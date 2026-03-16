@@ -1,103 +1,88 @@
 # Experiment 6 — JWT Authentication Backend
 
 **Student Name:** Vaidehi Sharma  
-**Course:** FullStack Development 2026  
 
 ---
 
-## Project Overview
+📌 Overview
+A secure backend authentication system built with Spring Boot and Spring Security that demonstrates JWT-based login, protected route access, and token invalidation — tested end-to-end using Postman.
 
-This project implements **JWT (JSON Web Token) Authentication** using **Spring Boot** and **Spring Security**.  
-It demonstrates secure login, protected route access, and token invalidation (logout).
+⚙️ Tech Stack
+TechnologyVersionPurposeJava17Core languageSpring Boot3.2.3Backend frameworkSpring Security6.2.2Security layerJWT (jjwt)0.11.5Token generation & validationH2 DatabaseRuntimeIn-memory user storeMaven3.9.xBuild tool
 
-## JWT Authentication Flow
-
-1. User sends `POST /login` with username and password
-2. Server validates credentials and returns a signed JWT token
-3. Client sends the token in `Authorization: Bearer <token>` header
-4. Spring Security filter validates the token on every protected request
-5. On logout, token is added to an in-memory blacklist
-
-## Tech Stack
-
-| Technology | Version |
-|---|---|
-| Java | 17 |
-| Spring Boot | 3.2.3 |
-| Spring Security | 6.2.2 |
-| JWT (jjwt) | 0.11.5 |
-| H2 Database | Runtime |
-| Maven | 3.9.x |
-
-## Project Structure
-
-```
+🗂️ Project Structure
 src/main/java/com/example/jwt_demo/
+│
 ├── controllers/
-│   └── AuthController.java       ← Login, Protected, Logout endpoints
+│   └── AuthController.java        ← /login  /protected  /logout
+│
 ├── security/
-│   ├── JwtUtil.java              ← Token generation & validation
-│   ├── JwtFilter.java            ← Intercepts & validates requests
-│   ├── SecurityConfig.java       ← Spring Security configuration
-│   └── TokenBlacklist.java       ← In-memory logout/blacklist
-├── HomeController.java
+│   ├── JwtUtil.java               ← Token generation & validation
+│   ├── JwtFilter.java             ← Intercepts every request
+│   ├── SecurityConfig.java        ← Spring Security config
+│   └── TokenBlacklist.java        ← In-memory token blacklist
+│
 └── JwtDemoApplication.java
-src/main/resources/
-└── application.properties
+
 screenshots/
 ├── 1_login_success.png
 ├── 2_protected_route.png
 └── 3_logout.png
-```
 
-## How to Run
+🔄 JWT Flow
+User → POST /login (credentials)
+             ↓
+       Server validates
+             ↓
+       JWT Token generated ───────────────────────┐
+             ↓                                    │
+       Token returned to client                   │
+             ↓                                    │
+User → GET /protected                             │
+       Authorization: Bearer <token> ←────────────┘
+             ↓
+       JwtFilter validates token
+             ↓
+       ✅ Access Granted
 
-```bash
-mvn spring-boot:run
-```
+🚀 How to Run
+bashmvn spring-boot:run
+Server → http://localhost:8083
+CredentialValueUsernameadminPasswordadmin123
 
-Server starts at: `http://localhost:8083`
+📡 API Endpoints
+MethodEndpointAuthDescriptionPOST/login❌Login → get JWT tokenGET/protected✅Access protected routePOST/logout✅Invalidate token
 
-**Default credentials:**
-- Username: `admin`
-- Password: `admin123`
-
-## API Endpoints
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | /login | No | Login and get JWT token |
-| GET | /protected | Yes | Access protected route |
-| POST | /logout | Yes | Invalidate token |
-
-## Postman Testing
-
-### Step 1 — Login
-```
-POST http://localhost:8083/login
-Content-Type: application/json
+🧪 Postman Testing
+Step 1 — Login
+jsonPOST http://localhost:8083/login
 
 {
   "username": "admin",
   "password": "admin123"
 }
+json{ "token": "eyJhbGciOiJIUzI1NiJ9..." }
 ```
 
-### Step 2 — Access Protected Route
+**Step 2 — Protected Route**
 ```
 GET http://localhost:8083/protected
-Authorization: Bearer <your_jwt_token>
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+json{ "message": "Access granted to protected route!", "status": "authenticated" }
 ```
 
-### Step 3 — Logout
+**Step 3 — Logout**
 ```
 POST http://localhost:8083/logout
-Authorization: Bearer <your_jwt_token>
-```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+json{ "message": "Logged out successfully. Token invalidated." }
 
-## Screenshots
 
-Stored in `screenshots/` folder:
-- `1_login_success.png` — Successful login with JWT token
-- `2_protected_route.png` — Protected route accessed with token
-- `3_logout.png` — Token invalidation on logout
+🎯 Key Concepts
+
+🔑 JWT Generation — HS256 signed, expires in 1 hour
+🛡️ JWT Validation — Every request intercepted by JwtFilter
+🚫 Token Blacklisting — Logout adds token to in-memory blacklist
+⚡ Stateless — Zero server-side session storage
+🔒 Spring Security — CSRF disabled, routes properly secured
+
